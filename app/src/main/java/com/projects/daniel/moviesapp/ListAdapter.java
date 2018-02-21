@@ -1,18 +1,23 @@
 package com.projects.daniel.moviesapp;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.projects.daniel.moviesapp.model.Movie;
 import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
 
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.PosterViewHolder> {
 
-    private int mNumberItems;
+    private ArrayList<Movie> list;
     private Context context;
     private final ListItemClickListener mClickListener;
 
@@ -20,8 +25,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.PosterViewHold
         void onItemClick(int itemIndex);
     }
 
-    public ListAdapter(Context context, int mNumberItems, ListItemClickListener mClickListener) {
-        this.mNumberItems = mNumberItems;
+    public ListAdapter(Context context, ArrayList<Movie> list, ListItemClickListener mClickListener) {
+        this.list = list;
         this.context = context;
         this.mClickListener = mClickListener;
     }
@@ -39,15 +44,21 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.PosterViewHold
     @Override
     public void onBindViewHolder(PosterViewHolder holder, int position) {
 
+        String posterId = list.get(position).getPosterId();
+        Uri uri = Uri.parse(NetworkUtils.POSTER_BASE_URL).buildUpon()
+                .appendEncodedPath(NetworkUtils.POSTER_SIZE)
+                .appendEncodedPath(posterId)
+                .build();
+
         Picasso.with(context)
-                .load("http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg")
+                .load(uri)
                 .fit().centerCrop()
                 .into(holder.imageView);
     }
 
     @Override
     public int getItemCount() {
-        return mNumberItems;
+        return list.size();
     }
 
     class PosterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -57,12 +68,17 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.PosterViewHold
         public PosterViewHolder(View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.movies_list_image_view);
-            imageView.setOnClickListener(this);
+            itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
             mClickListener.onItemClick(getAdapterPosition());
         }
+    }
+
+    public void setList(ArrayList<Movie> list) {
+        this.list = list;
+        notifyDataSetChanged();
     }
 }

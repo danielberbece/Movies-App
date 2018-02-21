@@ -6,7 +6,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.widget.Toast;
+
+import com.projects.daniel.moviesapp.model.Movie;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
@@ -16,10 +21,10 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
 
     private static final int NUM_LIST_ITEMS = 20;
     private static final int SPAN_COUNT = 2;
-    public static final String EXTRA_DETAIL_KEY = "details_key";
+    public static final String DETAILS_KEY = "details_key";
     private ListAdapter mAdapter;
     private RecyclerView mMoviesList;
-    private ArrayList<String> mMoviesData;
+    private ArrayList<Movie> mMoviesData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
         mMoviesList = findViewById(R.id.movies_rv);
         mMoviesList.setHasFixedSize(true);
 
-        mAdapter = new ListAdapter(this, NUM_LIST_ITEMS, this);
+        mAdapter = new ListAdapter(this, mMoviesData, this);
         mMoviesList.setAdapter(mAdapter);
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, SPAN_COUNT);
@@ -59,18 +64,30 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
 
         @Override
         protected void onPostExecute(String s) {
-            parseJsonToMovie(s);
+            parseJsonToMovies(s);
+            mAdapter.setList(mMoviesData);
         }
     }
 
-    private void parseJsonToMovie(String s) {
-        mMoviesData.add(s);
+    private void parseJsonToMovies(String s) {
+        mMoviesData.clear();
+        try {
+            JSONObject json = new JSONObject(s);
+            JSONArray jsonMovies = json.getJSONArray("results");
+            for(int i = 0; i < jsonMovies.length(); i++) {
+                JSONObject jsonMovie = jsonMovies.getJSONObject(i);
+                Movie movie = Movie.objectFromJson(jsonMovie);
+                mMoviesData.add(movie);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onItemClick(int itemIndex) {
         Intent detailActivityIntent = new Intent(this, DetailActivity.class);
-        detailActivityIntent.putExtra(EXTRA_DETAIL_KEY, mMoviesData.get(0));
+        detailActivityIntent.putExtra(DETAILS_KEY, mMoviesData.get(itemIndex));
         startActivity(detailActivityIntent);
     }
 }

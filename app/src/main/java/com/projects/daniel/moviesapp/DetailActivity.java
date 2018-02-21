@@ -4,6 +4,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
+import com.projects.daniel.moviesapp.model.Movie;
+
 public class DetailActivity extends AppCompatActivity {
 
     private TextView detailTextView;
@@ -17,7 +19,7 @@ public class DetailActivity extends AppCompatActivity {
 
         detailTextView = findViewById(R.id.detail_tv);
 
-        String extra = getIntent().getStringExtra(MainActivity.EXTRA_DETAIL_KEY);
-        detailTextView.setText(extra);
+        Movie extra = (Movie) getIntent().getSerializableExtra(MainActivity.DETAILS_KEY);
+        detailTextView.setText(extra.getOriginalTitle());
     }
 }

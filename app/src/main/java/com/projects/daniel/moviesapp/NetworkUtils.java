@@ -40,9 +40,10 @@ public class NetworkUtils {
     }
 
     public static URL getPosterQueryUrl(String posterString) {
-        Uri uri = Uri.parse(POSTER_BASE_URL).buildUpon().appendPath(POSTER_SIZE)
-                .appendPath(posterString).build();
-        Log.d("getPosterURL", uri.toString());
+        Uri uri = Uri.parse(POSTER_BASE_URL).buildUpon()
+                .appendEncodedPath(POSTER_SIZE)
+                .appendEncodedPath(posterString).build();
+
 
         URL url = null;
         try {
