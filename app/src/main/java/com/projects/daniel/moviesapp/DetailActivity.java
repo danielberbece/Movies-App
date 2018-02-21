@@ -17,7 +17,7 @@ public class DetailActivity extends AppCompatActivity {
 
         detailTextView = findViewById(R.id.detail_tv);
 
-        int extra = getIntent().getIntExtra(MainActivity.EXTRA_DETAIL_KEY, 0);
-        detailTextView.setText(String.valueOf(extra));
+        String extra = getIntent().getStringExtra(MainActivity.EXTRA_DETAIL_KEY);
+        detailTextView.setText(extra);
     }
 }
