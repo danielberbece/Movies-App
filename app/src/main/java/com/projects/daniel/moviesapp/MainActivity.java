@@ -64,9 +64,9 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
     private void updateCurrentMovies(String popularMovies) {
         mCurrentMovies = popularMovies;
         if(mCurrentMovies.equals(NetworkUtils.POPULAR_MOVIES)) {
-            getSupportActionBar().setTitle("Most popular movies");
+            getSupportActionBar().setTitle("Movies: Most popular");
         } else if(mCurrentMovies.equals(NetworkUtils.TOP_RATED_MOVIES)) {
-            getSupportActionBar().setTitle("Top rated movies");
+            getSupportActionBar().setTitle("Movies: Top rated");
         }
     }
 
