@@ -14,7 +14,7 @@ import java.util.Scanner;
 public class NetworkUtils {
     public static final String MOVIES_BASE_URL = "http://api.themoviedb.org/3";
     public static final String POSTER_BASE_URL = "http://image.tmdb.org/t/p";
-    public static String POSTER_SIZE = "w185";
+    public static String POSTER_SIZE = "w500";
     public static final String POPULAR_MOVIES = "movie/popular";
     public static final String TOP_RATED_MOVIES = "movie/top_rated";
     private static final String PARAM_KEY = "api_key";
@@ -37,22 +37,6 @@ public class NetworkUtils {
         } else {
             return null;
         }
-    }
-
-    public static URL getPosterQueryUrl(String posterString) {
-        Uri uri = Uri.parse(POSTER_BASE_URL).buildUpon()
-                .appendEncodedPath(POSTER_SIZE)
-                .appendEncodedPath(posterString).build();
-
-
-        URL url = null;
-        try {
-            url = new URL(uri.toString());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-
-        return url;
     }
 
     public static String getResponseFromHttpUrl(URL url) throws IOException {

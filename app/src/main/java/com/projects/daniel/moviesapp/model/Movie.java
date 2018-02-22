@@ -1,6 +1,8 @@
 package com.projects.daniel.moviesapp.model;
 
 
+import android.graphics.Bitmap;
+
 import org.json.JSONObject;
 
 import java.io.Serializable;
@@ -12,6 +14,7 @@ public class Movie implements Serializable {
     private String plot;
     private String releaseDate;
     private double rating;
+    private Bitmap posterImage;
 
     private static final String JSON_ORIGINAL_TITLE_KEY = "original_title";
     private static final String JSON_POSTER_KEY = "poster_path";
@@ -42,40 +45,20 @@ public class Movie implements Serializable {
         return originalTitle;
     }
 
-    public void setOriginalTitle(String originalTitle) {
-        this.originalTitle = originalTitle;
-    }
-
     public String getPosterId() {
         return posterId;
-    }
-
-    public void setPosterId(String posterId) {
-        this.posterId = posterId;
     }
 
     public String getPlot() {
         return plot;
     }
 
-    public void setPlot(String plot) {
-        this.plot = plot;
-    }
-
     public String getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
     public double getRating() {
         return rating;
-    }
-
-    public void setRating(double rating) {
-        this.rating = rating;
     }
 
     @Override

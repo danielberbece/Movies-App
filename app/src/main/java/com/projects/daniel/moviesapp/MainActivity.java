@@ -6,6 +6,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.projects.daniel.moviesapp.model.Movie;
 
@@ -19,17 +25,22 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements ListAdapter.ListItemClickListener {
 
-    private static final int NUM_LIST_ITEMS = 20;
+    private TextView errorTextView;
     private static final int SPAN_COUNT = 2;
     public static final String DETAILS_KEY = "details_key";
     private ListAdapter mAdapter;
     private RecyclerView mMoviesList;
     private ArrayList<Movie> mMoviesData;
+    private String mCurrentMovies;
+    private ProgressBar loadingProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        errorTextView = findViewById(R.id.error_tv);
+        loadingProgressBar = findViewById(R.id.progress_bar);
 
         mMoviesData = new ArrayList<>();
 
@@ -39,14 +50,33 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
         mAdapter = new ListAdapter(this, mMoviesData, this);
         mMoviesList.setAdapter(mAdapter);
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, SPAN_COUNT);
+        GridLayoutManager gridLayoutManager =
+                new GridLayoutManager(this, SPAN_COUNT);
+        gridLayoutManager.setItemPrefetchEnabled(true);
         mMoviesList.setLayoutManager(gridLayoutManager);
+
+        updateCurrentMovies(NetworkUtils.POPULAR_MOVIES);
 
         URL popularMoviesUrl = NetworkUtils.getMoviesQueryUrl(NetworkUtils.POPULAR_MOVIES);
         new MoviesQueryTask().execute(popularMoviesUrl);
     }
 
+    private void updateCurrentMovies(String popularMovies) {
+        mCurrentMovies = popularMovies;
+        if(mCurrentMovies.equals(NetworkUtils.POPULAR_MOVIES)) {
+            getSupportActionBar().setTitle("Most popular movies");
+        } else if(mCurrentMovies.equals(NetworkUtils.TOP_RATED_MOVIES)) {
+            getSupportActionBar().setTitle("Top rated movies");
+        }
+    }
+
     public class MoviesQueryTask extends AsyncTask<URL, Void, String>{
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            loadingProgressBar.setVisibility(View.VISIBLE);
+        }
 
         @Override
         protected String doInBackground(URL... urls) {
@@ -64,8 +94,14 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
 
         @Override
         protected void onPostExecute(String s) {
-            parseJsonToMovies(s);
-            mAdapter.setList(mMoviesData);
+            loadingProgressBar.setVisibility(View.INVISIBLE);
+            if( s != null ) {
+                errorTextView.setVisibility(View.INVISIBLE);
+                parseJsonToMovies(s);
+                mAdapter.setList(mMoviesData);
+            } else {
+                errorTextView.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -89,5 +125,33 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
         Intent detailActivityIntent = new Intent(this, DetailActivity.class);
         detailActivityIntent.putExtra(DETAILS_KEY, mMoviesData.get(itemIndex));
         startActivity(detailActivityIntent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.search_by_rating_menu_item:
+                if(!mCurrentMovies.equals(NetworkUtils.TOP_RATED_MOVIES)) {
+                    updateCurrentMovies(NetworkUtils.TOP_RATED_MOVIES);
+                    URL topRatedMoviesUrl = NetworkUtils.getMoviesQueryUrl(NetworkUtils.TOP_RATED_MOVIES);
+                    new MoviesQueryTask().execute(topRatedMoviesUrl);
+                }
+                break;
+            case R.id.search_by_popularity_menu_item:
+                if(!mCurrentMovies.equals(NetworkUtils.POPULAR_MOVIES)) {
+                    updateCurrentMovies(NetworkUtils.POPULAR_MOVIES);
+                    URL popularMoviesUrl = NetworkUtils.getMoviesQueryUrl(NetworkUtils.POPULAR_MOVIES);
+                    new MoviesQueryTask().execute(popularMoviesUrl);
+                }
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
