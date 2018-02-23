@@ -1,6 +1,8 @@
 package com.projects.daniel.moviesapp;
 
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,7 +28,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements ListAdapter.ListItemClickListener {
 
     private TextView errorTextView;
-    private static final int SPAN_COUNT = 2;
+    private static final int SPAN_COUNT_PORT = 2;
+    private static final int SPAN_COUNT_LAND = 3;
     public static final String DETAILS_KEY = "details_key";
     private ListAdapter mAdapter;
     private RecyclerView mMoviesList;
@@ -50,8 +53,14 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
         mAdapter = new ListAdapter(this, mMoviesData, this);
         mMoviesList.setAdapter(mAdapter);
 
+
+        int spanCount = SPAN_COUNT_PORT;
+        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            spanCount = SPAN_COUNT_LAND;
+        }
+
         GridLayoutManager gridLayoutManager =
-                new GridLayoutManager(this, SPAN_COUNT);
+                new GridLayoutManager(this, spanCount);
         gridLayoutManager.setItemPrefetchEnabled(true);
         mMoviesList.setLayoutManager(gridLayoutManager);
 
