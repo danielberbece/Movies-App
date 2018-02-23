@@ -51,6 +51,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.PosterViewHold
 
         Picasso.with(context)
                 .load(uri)
+                .placeholder(R.drawable.ic_photo_black_24dp)
+                .error(R.drawable.ic_error_outline_24dp)
                 .into(holder.imageView);
     }
 

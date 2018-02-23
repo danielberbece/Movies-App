@@ -44,7 +44,8 @@ public class DetailActivity extends AppCompatActivity {
 
         Picasso.with(this)
                 .load(uri)
-                .resize(500, 750)
+                .placeholder(R.drawable.ic_photo_black_24dp)
+                .error(R.drawable.ic_error_outline_24dp)
                 .into(posterView);
     }
 }

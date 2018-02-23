@@ -14,7 +14,6 @@ public class Movie implements Serializable {
     private String plot;
     private String releaseDate;
     private double rating;
-    private Bitmap posterImage;
 
     private static final String JSON_ORIGINAL_TITLE_KEY = "original_title";
     private static final String JSON_POSTER_KEY = "poster_path";
