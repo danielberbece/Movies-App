@@ -3,19 +3,30 @@ package com.projects.daniel.moviesapp;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.projects.daniel.moviesapp.model.Movie;
+import com.projects.daniel.moviesapp.adapters.TrailersAdapter;
+import com.projects.daniel.moviesapp.models.Movie;
+import com.projects.daniel.moviesapp.models.Trailer;
+import com.projects.daniel.moviesapp.tasks.DetailsTask;
 import com.squareup.picasso.Picasso;
 
-public class DetailActivity extends AppCompatActivity {
+import java.util.ArrayList;
+
+public class DetailActivity extends AppCompatActivity implements DetailsTask.AfterLoading {
 
     private TextView titleTextView;
     private TextView ratingTextView;
     private TextView plotTextView;
     private TextView releaseDate;
     private ImageView posterView;
+    private DetailsTask getDetailsTask;
+    private RecyclerView trailersRecyclerView;
+    private TrailersAdapter trailersAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,5 +58,25 @@ public class DetailActivity extends AppCompatActivity {
                 .placeholder(R.drawable.ic_photo_black_24dp)
                 .error(R.drawable.ic_error_outline_24dp)
                 .into(posterView);
+
+
+        getDetailsTask = new DetailsTask(this);
+        getDetailsTask.execute(NetworkUtils.getTrailersUrl(extra.getId()));
+
+        Log.d("First Trailers received", String.valueOf(getDetailsTask.getTrailers()));
+        trailersRecyclerView = findViewById(R.id.trailers_recyclerview);
+        trailersAdapter = new TrailersAdapter(this, getDetailsTask.getTrailers());
+
+        trailersRecyclerView.setAdapter(trailersAdapter);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setAutoMeasureEnabled(true);
+        trailersRecyclerView.setLayoutManager(linearLayoutManager);
+        trailersRecyclerView.setNestedScrollingEnabled(false);
+    }
+
+
+    @Override
+    public void onFinish() {
+        trailersAdapter.setTrailers(getDetailsTask.getTrailers());
     }
 }

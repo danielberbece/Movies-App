@@ -2,20 +2,19 @@ package com.projects.daniel.moviesapp;
 
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.projects.daniel.moviesapp.model.Movie;
+import com.projects.daniel.moviesapp.adapters.ListAdapter;
+import com.projects.daniel.moviesapp.models.Movie;
 
 import org.json.JSONArray;
 import org.json.JSONException;

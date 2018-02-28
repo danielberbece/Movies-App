@@ -1,4 +1,4 @@
-package com.projects.daniel.moviesapp;
+package com.projects.daniel.moviesapp.adapters;
 
 import android.content.Context;
 import android.net.Uri;
@@ -8,7 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.projects.daniel.moviesapp.model.Movie;
+import com.projects.daniel.moviesapp.NetworkUtils;
+import com.projects.daniel.moviesapp.R;
+import com.projects.daniel.moviesapp.models.Movie;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
