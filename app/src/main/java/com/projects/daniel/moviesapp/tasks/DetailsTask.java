@@ -4,8 +4,11 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.View;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.projects.daniel.moviesapp.NetworkUtils;
 import com.projects.daniel.moviesapp.adapters.TrailersAdapter;
+import com.projects.daniel.moviesapp.models.Review;
 import com.projects.daniel.moviesapp.models.Trailer;
 
 import org.json.JSONArray;
@@ -20,9 +23,10 @@ import java.util.ArrayList;
  * Created by Daniel on 3/1/2018.
  */
 
-public class DetailsTask extends AsyncTask<URL, Void, String> {
+public class DetailsTask extends AsyncTask<URL, Void, String[]> {
 
     private ArrayList<Trailer> trailers;
+    private ArrayList<Review> reviews;
     private AfterLoading afterLoading;
 
     public interface AfterLoading {
@@ -34,12 +38,12 @@ public class DetailsTask extends AsyncTask<URL, Void, String> {
     }
 
     @Override
-    protected String doInBackground(URL... urls) {
-        URL url = urls[0];
+    protected String[] doInBackground(URL... urls) {
+        String[] response = new String[2];
 
-        String response = null;
         try {
-            response = NetworkUtils.getResponseFromHttpUrl(url);
+            response[0] = NetworkUtils.getResponseFromHttpUrl(urls[0]);
+            response[1] = NetworkUtils.getResponseFromHttpUrl(urls[1]);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -48,18 +52,29 @@ public class DetailsTask extends AsyncTask<URL, Void, String> {
     }
 
     @Override
-    protected void onPostExecute(String jsonString) {
-        super.onPostExecute(jsonString);
+    protected void onPostExecute(String[] jsonStrings) {
+        super.onPostExecute(jsonStrings);
 
-        if(jsonString != null) {
+        if(jsonStrings != null) {
             try {
-                JSONObject jsonObject = new JSONObject(jsonString);
+                Gson gson = new GsonBuilder().create();
+
+                JSONObject jsonObject = new JSONObject(jsonStrings[0]);
                 JSONArray trailersJsonArray = jsonObject.getJSONArray("youtube");
                 ArrayList<Trailer> list = new ArrayList<>();
                 for(int i = 0; i < trailersJsonArray.length(); i++) {
                     list.add(Trailer.buildFromJson(trailersJsonArray.getJSONObject(i)));
                 }
                 trailers = new ArrayList<>(list);
+
+                JSONObject jsonReviews = new JSONObject(jsonStrings[1]);
+                JSONArray reviewsJsonArray = jsonReviews.getJSONArray("results");
+                ArrayList<Review> reviewsList = new ArrayList<>();
+                for(int i = 0; i < reviewsJsonArray.length(); i++) {
+                    reviewsList.add(gson.fromJson(reviewsJsonArray.getJSONObject(i).toString(), Review.class));
+                }
+                reviews = new ArrayList<>(reviewsList);
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -70,5 +85,9 @@ public class DetailsTask extends AsyncTask<URL, Void, String> {
 
     public ArrayList<Trailer> getTrailers() {
         return trailers;
+    }
+
+    public ArrayList<Review> getReviews() {
+        return reviews;
     }
 }

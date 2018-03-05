@@ -22,6 +22,10 @@
         <activity android:name=".DetailActivity"
             android:parentActivityName=".MainActivity">
         </activity>
+
+        <provider
+            android:authorities="com.projects.daniel.moviesapp"
+            android:name=".data.MoviesContentProvider" />
     </application>
 
 </manifest>

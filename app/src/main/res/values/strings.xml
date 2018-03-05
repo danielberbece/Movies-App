@@ -9,4 +9,6 @@
     <string name="show_most_popular">Show most popular</string>
     <string name="show_most_rated">Show most rated</string>
     <string name="poster_image">Poster Image</string>
+    <string name="favorite_movies">Favorite movies</string>
+    <string name="mark_as_favorite">Mark as favorite</string>
 </resources>

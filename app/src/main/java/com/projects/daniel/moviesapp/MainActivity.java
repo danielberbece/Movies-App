@@ -2,6 +2,7 @@ package com.projects.daniel.moviesapp;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,7 +15,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.projects.daniel.moviesapp.adapters.ListAdapter;
+import com.projects.daniel.moviesapp.data.MoviesContract;
 import com.projects.daniel.moviesapp.models.Movie;
+import com.projects.daniel.moviesapp.tasks.DetailsTask;
+import com.projects.daniel.moviesapp.tasks.FavoritesAsyncTask;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,8 +28,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements ListAdapter.ListItemClickListener {
 
+public class MainActivity extends AppCompatActivity implements ListAdapter.ListItemClickListener, DetailsTask.AfterLoading {
+
+    private static final String FAVORITES = "favorites";
     private TextView errorTextView;
     private static final int SPAN_COUNT_PORT = 2;
     private static final int SPAN_COUNT_LAND = 3;
@@ -34,7 +40,8 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
     private RecyclerView mMoviesList;
     private ArrayList<Movie> mMoviesData;
     private String mCurrentMovies;
-    private ProgressBar loadingProgressBar;
+    private ProgressBar mLoadingProgressBar;
+    private FavoritesAsyncTask favoritesAsyncTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
         setContentView(R.layout.activity_main);
 
         errorTextView = findViewById(R.id.error_tv);
-        loadingProgressBar = findViewById(R.id.progress_bar);
+        mLoadingProgressBar = findViewById(R.id.progress_bar);
 
         mMoviesData = new ArrayList<>();
 
@@ -75,7 +82,40 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
             getSupportActionBar().setTitle("Movies: Most popular");
         } else if(mCurrentMovies.equals(NetworkUtils.TOP_RATED_MOVIES)) {
             getSupportActionBar().setTitle("Movies: Top rated");
+        } else if(mCurrentMovies.equals(FAVORITES)) {
+            getSupportActionBar().setTitle("Movies: Favorites");
         }
+    }
+
+    @Override
+    public void onFinish() {
+        mMoviesData.clear();
+        Cursor cursor = favoritesAsyncTask.getCursorData();
+
+        if(cursor == null) {
+            mAdapter.setList(mMoviesData);
+            return;
+        }
+
+        int indexMovieId = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_MOVIE_ID);
+        int indexTitle = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_TITLE);
+        int indexPosterId = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_POSTER_ID);
+        int indexPlot = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_PLOT);
+        int indexReleaseDate = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_RELEASE_DATE);
+        int indexRating = cursor.getColumnIndex(MoviesContract.FavoriteMovieEntry.COLUMN_RATING);
+
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            int movieId = cursor.getInt(indexMovieId);
+            String title = cursor.getString(indexTitle);
+            String posterId = cursor.getString(indexPosterId);
+            String plot = cursor.getString(indexPlot);
+            String releaseDate = cursor.getString(indexReleaseDate);
+            double rating = cursor.getDouble(indexRating);
+            mMoviesData.add(new Movie(movieId, title, posterId, plot, releaseDate, rating));
+        }
+
+        mAdapter.setList(mMoviesData);
+        cursor.close();
     }
 
     public class MoviesQueryTask extends AsyncTask<URL, Void, String>{
@@ -83,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            loadingProgressBar.setVisibility(View.VISIBLE);
+            mLoadingProgressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -102,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
 
         @Override
         protected void onPostExecute(String s) {
-            loadingProgressBar.setVisibility(View.INVISIBLE);
+            mLoadingProgressBar.setVisibility(View.INVISIBLE);
             if( s != null ) {
                 errorTextView.setVisibility(View.INVISIBLE);
                 parseJsonToMovies(s);
@@ -137,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu, menu);
+        getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
 
@@ -158,6 +198,12 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
                     new MoviesQueryTask().execute(popularMoviesUrl);
                 }
                 break;
+            case R.id.search_by_favorites:
+                if(!mCurrentMovies.equals(FAVORITES)) {
+                    updateCurrentMovies(FAVORITES);
+                    favoritesAsyncTask = new FavoritesAsyncTask(this, this);
+                    favoritesAsyncTask.execute();
+                }
         }
 
         return super.onOptionsItemSelected(item);

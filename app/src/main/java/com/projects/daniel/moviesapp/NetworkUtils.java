@@ -20,6 +20,7 @@ public class NetworkUtils {
     public static final String TOP_RATED_MOVIES = "movie/top_rated";
     public static final String MOVIE_PARAM = "movie";
     public static final String TRAILERS_PARAM = "trailers";
+    public static final String REVIEWS_PARAM = "reviews";
     private static final String PARAM_KEY = "api_key";
 
     public static final String YOUTUBE_BASE_LINK = "www.youtube.com";
@@ -71,6 +72,24 @@ public class NetworkUtils {
         String str = uri.buildUpon().appendEncodedPath(MOVIE_PARAM)
                 .appendEncodedPath(String.valueOf(id))
                 .appendEncodedPath(TRAILERS_PARAM)
+                .appendQueryParameter(PARAM_KEY, Constants.API_KEY)
+                .build().toString();
+
+        URL url = null;
+        try {
+            url = new URL(str);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
+    public static URL getReviewsUrl(int id) {
+        Uri uri = Uri.parse(MOVIES_BASE_URL);
+        String str = uri.buildUpon().appendEncodedPath(MOVIE_PARAM)
+                .appendEncodedPath(String.valueOf(id))
+                .appendEncodedPath(REVIEWS_PARAM)
                 .appendQueryParameter(PARAM_KEY, Constants.API_KEY)
                 .build().toString();
 
