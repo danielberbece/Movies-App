@@ -58,23 +58,29 @@ public class DetailsTask extends AsyncTask<URL, Void, String[]> {
         if(jsonStrings != null) {
             try {
                 Gson gson = new GsonBuilder().create();
-
-                JSONObject jsonObject = new JSONObject(jsonStrings[0]);
-                JSONArray trailersJsonArray = jsonObject.getJSONArray("youtube");
-                ArrayList<Trailer> list = new ArrayList<>();
-                for(int i = 0; i < trailersJsonArray.length(); i++) {
-                    list.add(Trailer.buildFromJson(trailersJsonArray.getJSONObject(i)));
+                if(jsonStrings[0] != null) {
+                    JSONObject jsonObject = new JSONObject(jsonStrings[0]);
+                    JSONArray trailersJsonArray = jsonObject.getJSONArray("youtube");
+                    ArrayList<Trailer> list = new ArrayList<>();
+                    for (int i = 0; i < trailersJsonArray.length(); i++) {
+                        list.add(Trailer.buildFromJson(trailersJsonArray.getJSONObject(i)));
+                    }
+                    trailers = new ArrayList<>(list);
+                } else {
+                    trailers = new ArrayList<>();
                 }
-                trailers = new ArrayList<>(list);
 
-                JSONObject jsonReviews = new JSONObject(jsonStrings[1]);
-                JSONArray reviewsJsonArray = jsonReviews.getJSONArray("results");
-                ArrayList<Review> reviewsList = new ArrayList<>();
-                for(int i = 0; i < reviewsJsonArray.length(); i++) {
-                    reviewsList.add(gson.fromJson(reviewsJsonArray.getJSONObject(i).toString(), Review.class));
+                if(jsonStrings[1] != null) {
+                    JSONObject jsonReviews = new JSONObject(jsonStrings[1]);
+                    JSONArray reviewsJsonArray = jsonReviews.getJSONArray("results");
+                    ArrayList<Review> reviewsList = new ArrayList<>();
+                    for (int i = 0; i < reviewsJsonArray.length(); i++) {
+                        reviewsList.add(gson.fromJson(reviewsJsonArray.getJSONObject(i).toString(), Review.class));
+                    }
+                    reviews = new ArrayList<>(reviewsList);
+                } else {
+                    reviews = new ArrayList<>();
                 }
-                reviews = new ArrayList<>(reviewsList);
-
             } catch (JSONException e) {
                 e.printStackTrace();
             }

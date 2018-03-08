@@ -4,10 +4,13 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,16 +35,18 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements ListAdapter.ListItemClickListener, DetailsTask.AfterLoading {
 
     private static final String FAVORITES = "favorites";
-    private TextView errorTextView;
     private static final int SPAN_COUNT_PORT = 2;
-    private static final int SPAN_COUNT_LAND = 3;
-    public static final String DETAILS_KEY = "details_key";
+    private static final int SPAN_COUNT_LAND = 4;
+    private static final String LIST_STATE_KEY = "position_key";
+    public  static final String DETAILS_KEY = "details_key";
+    private TextView errorTextView;
     private ListAdapter mAdapter;
     private RecyclerView mMoviesList;
     private ArrayList<Movie> mMoviesData;
     private String mCurrentMovies;
     private ProgressBar mLoadingProgressBar;
     private FavoritesAsyncTask favoritesAsyncTask;
+    private Parcelable mListState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +81,23 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
         new MoviesQueryTask().execute(popularMoviesUrl);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        mListState = mMoviesList.getLayoutManager().onSaveInstanceState();
+        outState.putParcelable(LIST_STATE_KEY, mListState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        if(savedInstanceState != null) {
+            mListState = savedInstanceState.getParcelable(LIST_STATE_KEY);
+        }
+    }
+
     private void updateCurrentMovies(String popularMovies) {
         mCurrentMovies = popularMovies;
         if(mCurrentMovies.equals(NetworkUtils.POPULAR_MOVIES)) {
@@ -92,8 +114,8 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
         mMoviesData.clear();
         Cursor cursor = favoritesAsyncTask.getCursorData();
 
-        if(cursor == null) {
-            mAdapter.setList(mMoviesData);
+        if(cursor == null || cursor.getCount() == 0) {
+            mAdapter.notifyDataSetChanged();
             return;
         }
 
@@ -114,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
             mMoviesData.add(new Movie(movieId, title, posterId, plot, releaseDate, rating));
         }
 
-        mAdapter.setList(mMoviesData);
+        mAdapter.notifyDataSetChanged();
         cursor.close();
     }
 
@@ -146,9 +168,13 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListI
             if( s != null ) {
                 errorTextView.setVisibility(View.INVISIBLE);
                 parseJsonToMovies(s);
-                mAdapter.setList(mMoviesData);
+                mAdapter.notifyDataSetChanged();
             } else {
                 errorTextView.setVisibility(View.VISIBLE);
+            }
+
+            if(mListState != null) {
+                mMoviesList.getLayoutManager().onRestoreInstanceState(mListState);
             }
         }
     }

@@ -3,6 +3,7 @@ package com.projects.daniel.moviesapp;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,6 +38,9 @@ public class DetailActivity extends AppCompatActivity implements DetailsTask.Aft
     private RecyclerView reviewsRecyclerView;
     private ReviewsAdapter reviewsAdapter;
     private Menu menu;
+    private NestedScrollView nestedScrollView;
+    private int[] scrollPosition;
+    private static final String SCROLL_POSITION_KEY = "scroll_position_key";
 
 
     @Override
@@ -51,6 +55,7 @@ public class DetailActivity extends AppCompatActivity implements DetailsTask.Aft
         plotTextView = findViewById(R.id.plot_detail_view);
         releaseDate = findViewById(R.id.release_date_detail_view);
         posterView = findViewById(R.id.poster_detail_view);
+        nestedScrollView = findViewById(R.id.nested_scroll_view);
 
         movie = (Movie) getIntent().getSerializableExtra(MainActivity.DETAILS_KEY);
 
@@ -88,11 +93,29 @@ public class DetailActivity extends AppCompatActivity implements DetailsTask.Aft
         reviewsRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        int posX = nestedScrollView.getScrollX();
+        int posY = nestedScrollView.getScrollY();
+        outState.putIntArray(SCROLL_POSITION_KEY, new int[]{posX, posY});
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        scrollPosition = savedInstanceState.getIntArray(SCROLL_POSITION_KEY);
+    }
 
     @Override
     public void onFinish() {
         trailersAdapter.setTrailers(getDetailsTask.getTrailers());
         reviewsAdapter.setTrailers(getDetailsTask.getReviews());
+        if(scrollPosition != null) {
+            nestedScrollView.scrollTo(scrollPosition[0], scrollPosition[1]);
+        }
     }
 
     @Override

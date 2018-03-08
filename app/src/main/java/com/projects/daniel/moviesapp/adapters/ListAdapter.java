@@ -78,9 +78,4 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.PosterViewHold
             mClickListener.onItemClick(getAdapterPosition());
         }
     }
-
-    public void setList(ArrayList<Movie> list) {
-        this.list = list;
-        notifyDataSetChanged();
-    }
 }
